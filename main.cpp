@@ -5,6 +5,8 @@ inline void welcomeInfo() {
     printf("In this project, we will be detecting the defects on car paint with 2 and 3 dimensional vision.\n");
 }
 
+
 int main(int, char**) {
     welcomeInfo();
 }
+

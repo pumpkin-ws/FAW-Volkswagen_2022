@@ -6,6 +6,8 @@ enable_testing()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FAW-Volkswagen_SOURCE_DIR}/bin/)
 
+link_directories(${FAW-Volkswagen_SOURCE_DIR}/lib/)
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/cv/)
 
 add_executable(FAW-VW main.cpp)

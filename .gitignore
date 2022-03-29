@@ -3,3 +3,5 @@
 *.jpeg
 /build/
 /bin/
+**/bin/**
+**/lib/**
