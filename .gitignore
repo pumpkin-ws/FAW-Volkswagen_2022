@@ -1,7 +1,8 @@
 *.bmp
 *.jpg
 *.jpeg
-/build/
+/build/**
+**/build/**
 /bin/
 **/bin/**
 **/lib/**

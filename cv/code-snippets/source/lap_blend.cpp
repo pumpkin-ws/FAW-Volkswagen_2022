@@ -31,5 +31,39 @@ void LaplacianBlending::buildGaussianPyramid() {
 }
 
 void LaplacianBlending::buildLaplacianPyramid(const cv::Mat& img, std::vector<cv::Mat_<cv::Vec3f>>& lapPyr, cv::Mat& HighestLevel) {
-    
+    lapPyr.clear();
+    cv::Mat currentImg = img;
+    for (int l = 0; l < levels; l++) {
+        cv::Mat down, up;
+        cv::pyrDown(currentImg, down);
+        cv::pyrUp(down, up, currentImg.size());
+        cv::Mat lap = currentImg - up;
+        lapPyr.push_back(lap);
+        currentImg = down;
+    }
+    currentImg.copyTo(HighestLevel);
 }
+
+cv::Mat_<cv::Vec3f> LaplacianBlending::reconstructImgFromLapPyramid() {
+    cv::Mat currentImg = resultHighestLevel;
+    for(int l = levels - 1; l >=0; l--) {
+        cv::Mat up;
+        cv::pyrUp(currentImg, up, resultLapPyr[l].size());
+        currentImg = up + resultLapPyr[l];
+    }
+    return currentImg;
+}
+
+void LaplacianBlending::blendLapPyrs() {
+    resultHighestLevel = leftHighestLevel.mul(maskGaussianPyramid.back()) + 
+        rightHighestLevel.mul(cv::Scalar(1.0, 1.0, 1.0) - maskGaussianPyramid.back());
+    for (int l = 0; l < levels; l++) {
+        cv::Mat A = leftLapPyr[l].mul(maskGaussianPyramid[l]);
+        cv::Mat antiMask = cv::Scalar(1.0, 1.0, 1.0) - maskGaussianPyramid[l];
+        cv::Mat B = rightLapPyr[l].mul(antiMask);
+        cv::Mat_<cv::Vec3f> blendedLevel = A + B;
+
+        resultLapPyr.push_back(blendedLevel);
+    }
+}
+
