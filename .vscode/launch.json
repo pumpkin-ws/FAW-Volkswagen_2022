@@ -5,6 +5,54 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "unwarp images",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cv/code-snippets/bin/unwarp-imgs",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/cv/code-snippets/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Laplacian Blending",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cv/code-snippets/bin/laplacian-blending",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/cv/code-snippets/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "combine-img",
             "type": "cppdbg",
             "request": "launch",
