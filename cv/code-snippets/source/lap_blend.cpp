@@ -62,7 +62,6 @@ void LaplacianBlending::blendLapPyrs() {
         cv::Mat antiMask = cv::Scalar(1.0, 1.0, 1.0) - maskGaussianPyramid[l];
         cv::Mat B = rightLapPyr[l].mul(antiMask);
         cv::Mat_<cv::Vec3f> blendedLevel = A + B;
-
         resultLapPyr.push_back(blendedLevel);
     }
 }
