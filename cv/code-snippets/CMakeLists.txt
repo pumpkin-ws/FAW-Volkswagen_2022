@@ -36,4 +36,4 @@ add_executable(laplacian-blending laplacian-blending.cpp)
 target_link_libraries(laplacian-blending ${OpenCV_LIBS} LapBlend)
 
 add_executable(unwarp-imgs unwarp-imgs.cpp)
-target_link_libraries(unwarp-imgs ${OpenCV_LIBS} DetectTraget FileManip PerspectiveTransform)
+target_link_libraries(unwarp-imgs ${OpenCV_LIBS} DetectTraget FileManip PerspectiveTransform LapBlend)

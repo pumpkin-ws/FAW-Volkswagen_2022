@@ -46,6 +46,8 @@ int main(int argc, char** argv) {
 
     cv::imwrite("combined.jpg", out);
 
+    
+
     return EXIT_SUCCESS;
    
 }

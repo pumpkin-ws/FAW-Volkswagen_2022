@@ -29,12 +29,14 @@ int main(int argc, char** argv) {
     /* Create blend mask matrix m */
     std::cout << l.rows << ", " << l.cols << std::endl;
     cv::Mat_<float> m(l.rows, l.cols, 0.0);
-    m(cv::Range(0, m.rows / 2), cv::Range(0, m.cols / 2)) = 1.0;
+    m(cv::Range(0, m.rows), cv::Range(0, m.cols / 2)) = 1.0;
 
-    cv::imshow("mask", m);
+    // cv::imshow("mask", m);
     
     cv::Mat_<cv::Vec3f> blend = LaplacianBlend(l, r, m);
-    cv::imshow("blended", blend);
+    std::cout << "The number of channels in blend is " << blend.channels() << std::endl;
+    cv::Mat result = blend.clone();
+    cv::imshow("blended", result);
     cv::waitKey(0);
     return EXIT_SUCCESS;
 }   

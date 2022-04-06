@@ -23,6 +23,8 @@ private:
 public:
     LaplacianBlending(const cv::Mat_<cv::Vec3f>& _left, const cv::Mat_<cv::Vec3f>& _right, const cv::Mat_<float>& _blendMask, int _levels)
     : left(_left), right(_right), blendMask(_blendMask), levels(_levels) {
+        std::cout << "Image of the left side is " << _left.size() << std::endl;
+        std::cout << "Image of the right side is " <<_right.size() << std::endl;
         assert(_left.size() == _right.size()); // why left size needs to be equal to right size?
         assert(_left.size() == _blendMask.size());
         buildPyramids(); // construct laplacian pyramid and gaussian pyramid
