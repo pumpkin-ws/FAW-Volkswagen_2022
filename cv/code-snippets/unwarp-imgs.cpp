@@ -25,13 +25,18 @@ int main(int argc, char** argv) {
         cv::resize(img, img, img.size()/8);
         input_imgs.push_back(img);
     }
+
+    for (int i = 0; i < img_fnames.size(); i++) {
+        std::string save_name = "./data/movement-result/resize" + std::to_string(i) + ".jpg";
+        cv::imwrite(save_name, input_imgs[i]);
+    }
+
     /* detect the keypoints the image */
     std::vector<cv::Point2f> centers;
     findAndDrawSymmCircles(input_imgs[0], centers, cv::Size(7, 7), true);
 
     /* unwarp image */
     spark_vision::ImageWarper warper;
-    // warper.help();
 
     std::vector<cv::Point2f> original_points;
     std::vector<cv::Point2f> objective_points;
@@ -72,12 +77,12 @@ int main(int argc, char** argv) {
         cv::Mat unwarp;
         warper.warpImage(input_imgs[i], unwarp);
         unwarped_imgs.push_back(unwarp);
+        std::string save_name = "./data/movement-result/unwarp" + std::to_string(i) + ".jpg";
+        cv::imwrite(save_name, unwarp);
         std::vector<cv::Mat> vert{input_imgs[i], unwarp};
         cv::Mat concat;
         
         cv::hconcat(vert, concat);
-        // cv::line(unwarp, cv::Point2f(centers[0].x, 0), cv::Point2f(centers[0].x, unwarp.size().height), cv::Scalar(0, 0, 255), 3);
-        // cv::line(input_imgs[i], cv::Point2f(centers[0].x, 0), cv::Point2f(centers[0].x, unwarp.size().height), cv::Scalar(0, 0, 255), 3);
 
         cv::imshow("unwarp concat", concat);
         cv::imshow("input", input_imgs[i]);
@@ -147,17 +152,12 @@ int main(int argc, char** argv) {
     for (int i = 1; i < unwarped_gray.size(); i++) {
         cv::Mat clipped_mat = unwarped_gray[i](cv::Rect(0, unwarped_gray[i].rows - int(pixel_to_distance * 15), unwarped_gray[i].cols, int(pixel_to_distance * 15)));
         std::vector<cv::Mat> combine_imgs{total_mat1, clipped_mat};
-        printf("Total mat:\n");
-        std::cout << total_mat.size() << std::endl;
-        cv::imshow("total", total_mat1);
-        cv::imshow("clipped", clipped_mat);
-        cv::waitKey(50);
-        printf("clipped mat:\n");
-        std::cout << clipped_mat.size() << std::endl;
         cv::vconcat(combine_imgs, total_mat1);
     }
     cv::imshow("simple combine", total_mat1);
     cv::waitKey(0);
+
+    cv::imwrite("./data/movement-result/simple_concat.jpg", total_mat1);
 
     /* gray readjusted */
     if (unwarped_imgs[0].type() == CV_8UC1) {
@@ -166,30 +166,59 @@ int main(int argc, char** argv) {
         printf("The type is 8UC3\n");
     }
     cv::destroyAllWindows();
-    std::cout << (int)unwarped_gray[1].at<char>(100, 100) << std::endl;
-    for (int i = 1; i < unwarped_gray.size(); i++) {
-        cv::Mat clipped_mat = unwarped_gray[i](cv::Rect(0, unwarped_gray[i].rows - int(pixel_to_distance * 15), unwarped_gray[i].cols, int(pixel_to_distance * 15)));
-        /* adjust the gray pixels of the clipped mat */
-        for (int j = 0; j < clipped_mat.cols; j++) {
-            std::cout << (unsigned) total_mat1.at<char>( total_mat1.rows, j) << std::endl;
-            std::cout << (unsigned)clipped_mat.at<char>(clipped_mat.rows, j)<< std::endl;
-            double adjust_scale = (int)total_mat1.at<char>(cv::Point(j, total_mat1.rows)) / (int)clipped_mat.at<char>(cv::Point(j, clipped_mat.rows));
-            for (int k = 0; k < clipped_mat.rows; k++) {
-                clipped_mat.at<char>(cv::Point(k, j)) /= adjust_scale;
+
+
+    cv::Mat total_mat2(unwarped_gray[0].size(), CV_64FC1, cv::Scalar(0));
+    for (int i = 0; i < total_mat2.rows; i++) {
+        for (int j = 0; j < total_mat2.cols; j++) {
+            total_mat2.at<double>(i, j) = (double)(unwarped_gray[0].at<uchar>(i, j)) / 1000.0;
+            if (fabs((double)(unwarped_gray[0].at<uchar>(i, j))) < 1e-5) {
+                total_mat2.at<double>(i, j) = 1.0 / 1000.0;
             }
         }
-        std::vector<cv::Mat> combine_imgs{total_mat1, clipped_mat};
-        printf("Total mat:\n");
-        std::cout << total_mat.size() << std::endl;
-        cv::imshow("total", total_mat1);
-        cv::imshow("clipped", clipped_mat);
-        cv::waitKey(0);
-        printf("clipped mat:\n");
-        std::cout << clipped_mat.size() << std::endl;
-        cv::vconcat(combine_imgs, total_mat1);
     }
-    cv::imshow("gray adjust combine", total_mat1);
-    cv::waitKey(0);
+    for (int i = 1; i < unwarped_gray.size(); i++) {
+        cv::Mat clipped_mat_uchar = unwarped_gray[i](cv::Rect(0, unwarped_gray[i].rows - int(pixel_to_distance * 15), unwarped_gray[i].cols, int(pixel_to_distance * 15))).clone();
+        cv::Mat clipped_mat_double(clipped_mat_uchar.size(), CV_64FC1, cv::Scalar(0));
+        for (int j = 0; j < clipped_mat_double.rows; j++) {
+            for (int k = 0; k < clipped_mat_double.cols; k++) {
+                clipped_mat_double.at<double>(j, k) = (double)((double)clipped_mat_uchar.at<uchar>(j, k) / 1000.0);
+                if (fabs((double)clipped_mat_uchar.at<uchar>(j, k)) < 1e-5) {
+                    clipped_mat_double.at<double>(j, k) = 1.0 / 1000.0;
+                }
+            }
+        }
+        for (int j = 0; j < clipped_mat_double.cols; j++) {
+            std::cout << total_mat2.at<double>(total_mat2.rows - 1, j) << std::endl;
+            std::cout << clipped_mat_double.at<double>(0, j) << std::endl;
+            double adjust_scale = total_mat2.at<double>(total_mat2.rows - 1, j) / clipped_mat_double.at<double>(0, j);
+            for (int k = 0; k < clipped_mat_double.rows; k++) {
+                clipped_mat_double.at<double>(k, j) *= adjust_scale;
+            }
+        }
+        cv::GaussianBlur(clipped_mat_double, clipped_mat_double, cv::Size(3, 3), 1, 3);
+        std::vector<cv::Mat> combine_imgs{total_mat2, clipped_mat_double};
+        cv::vconcat(combine_imgs, total_mat2);
+        cv::imshow("combine", total_mat2);
+        cv::waitKey(50);
+    }
 
+    for (int i = 0; i < total_mat2.rows; i++) {
+        for (int j = 0; j < total_mat2.cols; j++) {
+            total_mat2.at<double>(i, j) *= 1000;
+        }
+    }
+    cv::imshow("combine", total_mat2);
+    cv::waitKey(0);
+    cv::Mat output;
+    total_mat2.convertTo(output, CV_8UC1);
+
+    // cv::equalizeHist(output, output);
+
+    cv::imwrite("./data/movement-result/gray_stitched.jpg", output);
+
+    
+
+    
     return EXIT_SUCCESS;
 }
